@@ -300,7 +300,7 @@
       </div>
       
       <div class="btn-group">
-        <button type="submit" class="login-btn-doctor">LOGIN AS DOCTOR</button>
+        <button type="submit" class="login-btn-doctor" data-role="admin" onclick="handleRoleLogin(this)">LOGIN AS DOCTOR</button>
         <button type="submit" class="login-btn-admin" data-role="admin" onclick="handleRoleLogin(this)">LOGIN AS ADMIN</button>
       </div>
       <a href="patient-login" class="register">Not a Doctor/Admin? Login as a Patient!</a>
@@ -381,7 +381,7 @@
         if (role === 'admin') {
             window.location.href = 'admin-dashboard';
         } else if (role === 'doctor') {
-            window.location.href = 'doctor.dashboard';
+            window.location.href = 'doctor-dashboard';
         } else if (role === 'patient') {
             window.location.href = 'patient-dashboard';
         }

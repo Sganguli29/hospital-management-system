@@ -271,28 +271,28 @@
 
     <div id="errorMessage" class="error-message"></div>
 
-    <form onsubmit="return handleRegister(event)">
+    <form onsubmit="return handleRegister(event)"  method="post" action="/register">
       <div class="input-box">
-        <input type="text" placeholder="Full Name" required>
+        <input type="text" name="fullname" placeholder="Full Name" required>
         <i>🧑</i>
       </div>
       <div class="input-box">
-        <input type="text" placeholder="Username" required>
+        <input type="text" name="username" placeholder="Username" required>
         <i>👤</i>
       </div>
       <div class="input-box">
-        <input type="email" placeholder="Email" required>
+        <input type="email" name="email" placeholder="Email" required>
         <i>📧</i>
       </div>
       <div class="input-box">
-        <input type="password" placeholder="Password" required id="passwordInput">
+        <input type="password" name="password" placeholder="Password" required id="passwordInput">
         <span class="password-toggle" onclick="togglePasswordVisibility()">
           <i class="show-icon">👁️</i> 
           <i class="hide-icon" style="display: none;">🙈</i> 
         </span>
       </div>
       <div class="input-box">
-        <input type="password" placeholder="Confirm Password" required id="confirmPasswordInput">
+        <input type="password" name="confirm_password" placeholder="Confirm Password" required id="confirmPasswordInput">
         <i>🔒</i>
       </div>
 
@@ -336,11 +336,7 @@
         errorDiv.style.display = 'block';
         return false;
       }
-
-      // Simulated successful registration
-      alert('Registration successful! You can now login.');
-      // window.location.href = 'login.html'; // Uncomment to redirect to login page
-      return false;
+      event.target.submit();      
     }
 
     function toggleMenu() {

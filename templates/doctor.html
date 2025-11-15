@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doctor Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #1e48d3; /* Dark Blue for buttons/accents */
+      --secondary-color: #d9534f; /* Red for cancel/danger */
+      --background-color: #4c5d94; /* Deep Blue background from Admin */
+      --card-bg: rgba(255, 255, 255, 0.07); /* Semi-transparent card background */
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      --success: #5cb85c;
+      --warning: #f0ad4e;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      background: var(--background-color);
+      margin: 0;
+      padding: 0;
+      color: white; 
+    }
+    
+    header {
+      background: var(--primary-color);
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow);
+    }
+    header h2 { margin: 0; font-weight: 600; font-size: 1.25rem; }
+    header button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      background: var(--secondary-color);
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+    header button:hover { background: #c12e2a; }
+
+    main {
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    /* Sections */
+    section {
+      margin-bottom: 30px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+    }
+
+    h2 { margin-top: 0; margin-bottom: 15px; color: white; }
+    
+    /* Table Styling */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    table th, table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    table th {
+      background: rgba(255,255,255,0.15);
+    }
+    table tr:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    /* Appointment Status Colors */
+    .status-Confirmed { color: var(--success); }
+    .status-Pending { color: var(--warning); }
+    .status-Canceled { color: var(--secondary-color); }
+    .status-Completed { color: #ccc; }
+
+    /* Buttons */
+    .action-group button {
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      margin-right: 5px;
+    }
+    .btn-approve { background: var(--success); }
+    .btn-approve:hover { background: #4cae4c; }
+    .btn-reject { background: var(--secondary-color); }
+    .btn-reject:hover { background: #c12e2a; }
+    .btn-diag { background: var(--primary-color); }
+    .btn-diag:hover { background: #3a5cbf; }
+
+    /* Modal Styles */
+    .modal {
+      display: none; 
+      position: fixed; 
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto; 
+      background-color: rgba(0,0,0,0.6); 
+    }
+    .modal-content {
+      background-color: #fefefe;
+      color: #333; 
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%; 
+      max-width: 600px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+    }
+    .close-button {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .modal-content input, .modal-content textarea {
+        background: white;
+        color: #333;
+        border: 1px solid #ccc;
+        padding: 10px;
+        width: 100%;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        box-sizing: border-box;
+    }
+    .modal-content label {
+        color: #333;
+        display: block;
+        margin-bottom: 5px;
+    }
+    .modal-content button {
+        background: var(--primary-color);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        border: none;
+    }
+
+    /* Message Box */
+    #messageBox {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        z-index: 1001;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+    }
+    .message-error { background: var(--secondary-color); }
+    .message-warning { background: var(--warning); color: #333; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h2>Welcome, Dr. <span id="doctorName"></span></h2>
+  <button onclick="logout()">Logout</button>
+</header>
+
+<main>
+    <section>
+        <h2>Upcoming Appointments (<span id="upcomingCount">0</span>)</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Date & Time</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="upcomingAppointmentsTable">
+                    <!-- Data populated here -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section>
+        <h2>Past Appointments (<span id="pastCount">0</span>)</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Date & Time</th>
+                        <th>Diagnosis</th>
+                        <th>Prescription</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="pastAppointmentsTable">
+                    <!-- Data populated here -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<!-- Diagnosis/Prescription Modal -->
+<div id="diagnosisModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeModal('diagnosisModal')">&times;</span>
+        <h3>Submit Medical Record for <span id="modalPatientName"></span></h3>
+        <form id="diagnosisForm">
+            <input type="hidden" id="apptIdForDiagnosis">
+            <div class="form-group">
+                <label for="diagnosisInput">Diagnosis:</label>
+                <textarea id="diagnosisInput" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="prescriptionInput">Prescription:</label>
+                <textarea id="prescriptionInput" rows="3" required></textarea>
+            </div>
+            <button type="submit">Submit and Mark as Completed</button>
+        </form>
+    </div>
+</div>
+
+<!-- Global Message Box -->
+<div id="messageBox"></div>
+
+<script>
+    // --- Global State & Initialization ---
+    const DOCTOR_USERNAME = sessionStorage.getItem('username');
+    const DOCTOR_FULL_NAME = "Dr. Smith"; // Hardcoded mapping for demo: drsmith -> Dr. Smith
+    
+    // Fallback if the user is logged in as another doctor in the future
+    const LoggedInDoctorName = DOCTOR_USERNAME === 'drsmith' ? DOCTOR_FULL_NAME : DOCTOR_USERNAME;
+
+    let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+    
+    // --- Utility Functions ---
+
+    function saveAppointments() {
+        localStorage.setItem('appointments', JSON.stringify(appointments));
+    }
+
+    function showMessage(message, isError = false, isWarning = false) {
+        const box = document.getElementById('messageBox');
+        if (!box) { console.error("Error: messageBox element not found."); return; }
+
+        box.textContent = message;
+        box.className = ''; 
+        
+        if (isError) {
+            box.classList.add('message-error');
+        } else if (isWarning) {
+            box.classList.add('message-warning');
+        } else {
+            box.style.background = 'var(--success)';
+        }
+
+        box.style.display = 'block';
+        box.style.opacity = 1;
+
+        setTimeout(() => {
+            box.style.opacity = 0;
+            setTimeout(() => box.style.display = 'none', 500);
+        }, 3000);
+    }
+
+    function openModal(id) {
+        document.getElementById(id).style.display = 'block';
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    }
+
+    // --- Authentication and Setup ---
+
+    (function init() {
+        const role = sessionStorage.getItem('role');
+        if (role !== 'doctor' || !LoggedInDoctorName) {
+            showMessage('Access denied! Please login as Doctor.', true);
+            setTimeout(() => { window.location.href = 'doctor-admin-login.html'; }, 500);
+            return;
+        }
+
+        document.getElementById('doctorName').textContent = LoggedInDoctorName;
+        renderAppointments();
+    })();
+
+    function logout() {
+        sessionStorage.clear();
+        window.location.href = 'doctor-admin-login.html';
+    }
+
+    // --- Appointment Rendering ---
+    function renderAppointments() {
+        const myAppointments = appointments.filter(a => a.doctor === LoggedInDoctorName);
+
+        const upcoming = myAppointments.filter(a => a.status === 'Confirmed' || a.status === 'Pending' || a.status === 'Rescheduled');
+        const past = myAppointments.filter(a => a.status === 'Completed' || a.status === 'Canceled');
+
+        document.getElementById('upcomingCount').textContent = upcoming.length;
+        document.getElementById('pastCount').textContent = past.length;
+
+        // Render Upcoming
+        document.getElementById('upcomingAppointmentsTable').innerHTML = upcoming.map(a => `
+            <tr>
+                <td>${a.patient}</td>
+                <td>${a.date} at ${a.time}</td>
+                <td>${a.reason || 'N/A'}</td>
+                <td><span class="status-${a.status}">${a.status}</span></td>
+                <td class="action-group">
+                    ${a.status === 'Pending' || a.status === 'Rescheduled' ? 
+                        `<button class="btn-approve" onclick="updateStatus('${a.id}', 'Confirmed')">Confirm</button>
+                         <button class="btn-reject" onclick="updateStatus('${a.id}', 'Canceled')">Reject</button>` :
+                        `<button class="btn-diag" onclick="prepareDiagnosis('${a.id}', '${a.patient}')">Submit Record</button>`
+                    }
+                </td>
+            </tr>
+        `).join('');
+
+        // Render Past
+        document.getElementById('pastAppointmentsTable').innerHTML = past.map(a => `
+            <tr>
+                <td>${a.patient}</td>
+                <td>${a.date} at ${a.time}</td>
+                <td>${a.diagnosis || 'N/A'}</td>
+                <td>${a.prescription || 'N/A'}</td>
+                <td><span class="status-${a.status}">${a.status}</span></td>
+            </tr>
+        `).join('');
+    }
+
+    // --- Appointment Management Logic ---
+
+    function updateStatus(apptId, newStatus) {
+        const index = appointments.findIndex(a => a.id == apptId);
+        if (index !== -1) {
+            appointments[index].status = newStatus;
+            saveAppointments();
+            renderAppointments();
+            showMessage(`Appointment ${apptId} updated to ${newStatus}.`);
+        } else {
+            showMessage(`Error: Appointment ${apptId} not found.`, true);
+        }
+    }
+
+    function prepareDiagnosis(apptId, patientName) {
+        document.getElementById('apptIdForDiagnosis').value = apptId;
+        document.getElementById('modalPatientName').textContent = patientName;
+        document.getElementById('diagnosisForm').reset();
+        openModal('diagnosisModal');
+    }
+
+    document.getElementById('diagnosisForm').onsubmit = function(e) {
+        e.preventDefault();
+        const apptId = document.getElementById('apptIdForDiagnosis').value;
+        const diagnosis = document.getElementById('diagnosisInput').value.trim();
+        const prescription = document.getElementById('prescriptionInput').value.trim();
+
+        const index = appointments.findIndex(a => a.id == apptId);
+
+        if (index !== -1) {
+            appointments[index].diagnosis = diagnosis;
+            appointments[index].prescription = prescription;
+            appointments[index].status = "Completed";
+            saveAppointments();
+            renderAppointments();
+            closeModal('diagnosisModal');
+            showMessage(`Medical record submitted for patient ${appointments[index].patient}. Appointment marked as Completed.`);
+        } else {
+            showMessage(`Error: Appointment ${apptId} not found for updating medical record.`, true);
+        }
+    };
+</script>
+
+</body>
+</html>

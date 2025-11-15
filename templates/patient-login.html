@@ -273,16 +273,16 @@
       0V9h.5a1,1,0,0,0,0-2Zm4,9.5h-1a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Z"/>
     </svg>
 
-    <form onsubmit="return handleLoginAttempt(event)">
+    <form method="POST" action="/patient-login">>
       
       <div id="errorMessage" class="error-message"></div>
       
       <div class="input-box">
-        <input type="text" placeholder="Username" required>
+        <input type="text" placeholder="Username" required name=username>
         <i>👤</i>
       </div>
       <div class="input-box">
-        <input type="password" placeholder="Password" required id="passwordInput">
+        <input type="password" placeholder="Password" required id="passwordInput" name=password>
         <span class="password-toggle" onclick="togglePasswordVisibility()">
           <i class="show-icon">👁️</i> 
           <i class="hide-icon" style="display: none;">🙈</i> 
@@ -331,30 +331,9 @@
       }
     }
 
-    function handleLoginAttempt(event) {
-    event.preventDefault();
+      
 
-    const errorDiv = document.getElementById('errorMessage');
-    errorDiv.textContent = '';
-    errorDiv.style.display = 'none';
-
-    const username = event.target.querySelector('input[type="text"]').value;
-    const password = event.target.querySelector('input[type="password"]').value;
-
-    // Hardcoded credentials for patient
-    const patientCreds = { username: "patient1", password: "pass123" };
-
-    if (username === patientCreds.username && password === patientCreds.password) {
-        sessionStorage.setItem('role', 'patient');
-        sessionStorage.setItem('username', username);
-        window.location.href = 'patient-dashboard'; // redirect to patient dashboard
-    } else {
-        errorDiv.textContent = 'Invalid username or password!';
-        errorDiv.style.display = 'block';
-    }
-}
-
-function toggleMenu() {
+    function toggleMenu() {
         const nav = document.getElementById('navLinks');
         nav.classList.toggle('active');
     }

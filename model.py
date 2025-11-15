@@ -1,9 +1,11 @@
-from app import app
+
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from sqlalchemy.orm import relationship
 
-db = SQLAlchemy(app)    
+
+db = SQLAlchemy()  
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(150), unique=True, nullable=False)
@@ -38,6 +40,14 @@ class Doctor(db.Model):
     appointments = relationship('Appointment', backref='doctor')
     schedules = relationship('DoctorSchedule', backref='doctor')
 
+class DoctorSchedule(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
+    day_of_week = db.Column(db.String(10), nullable=False) # e.g., 'Monday'
+    start_time = db.Column(db.Time, nullable=False) 
+    end_time = db.Column(db.Time, nullable=False)
+
+    
 class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     
@@ -76,5 +86,3 @@ class Treatment(db.Model):
     created_by_doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
     doctor_creator = relationship('Doctor', backref='created_treatments', foreign_keys=[created_by_doctor_id])
     
-with app.app_context(): 
-    db.create_all()
