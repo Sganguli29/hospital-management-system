@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #4c5d94;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h2 { margin: 0; }
+    header button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      background: #d9534f;
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    main {
+      padding: 20px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    .doctor-result, .appointment {
+      background: white;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .doctor-result button, .appointment button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      background: #4c5d94;
+      color: white;
+      cursor: pointer;
+    }
+    h3 { margin-top: 30px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h2>Welcome, <span id="patientName"></span></h2>
+  <button onclick="logout()">Logout</button>
+</header>
+
+<main>
+  <h3>Search Doctors</h3>
+  <input type="text" id="searchDoctor" placeholder="Search by name or specialization">
+  <div id="doctorResults"></div>
+
+  <h3>Upcoming Appointments</h3>
+  <div id="upcomingAppointments"></div>
+
+  <h3>Past Appointments</h3>
+  <div id="pastAppointments"></div>
+</main>
+
+<script>
+  // Check login
+  const role = sessionStorage.getItem('role');
+  if(role !== 'patient'){
+    alert('Access denied! Please login as Patient.');
+    window.location.href = 'login.html';
+  }
+
+  // Welcome message
+  const patientName = sessionStorage.getItem('username') || 'Patient';
+  document.getElementById('patientName').textContent = patientName;
+
+  // Logout function
+  function logout() {
+    sessionStorage.clear();
+    window.location.href = 'patient-login';
+  }
+
+  // Doctor search & booking
+  const doctors = [
+    { name: "Dr. Smith", specialization: "Cardiologist" },
+    { name: "Dr. Adams", specialization: "Dermatologist" },
+    { name: "Dr. Lee", specialization: "Neurologist" },
+    { name: "Dr. Patel", specialization: "Pediatrician" }
+  ];
+
+  const upcomingAppointments = [
+    { doctor: "Dr. Smith", date: "2025-11-15", status: "Confirmed" },
+    { doctor: "Dr. Lee", date: "2025-11-20", status: "Pending" }
+  ];
+
+  const pastAppointments = [
+    { doctor: "Dr. Adams", date: "2025-10-01", diagnosis: "Allergy", prescription: "Antihistamines" }
+  ];
+
+  // Render doctor results
+  const doctorInput = document.getElementById('searchDoctor');
+  doctorInput.addEventListener('input', function(){
+    const query = this.value.toLowerCase();
+    const results = doctors.filter(d => d.name.toLowerCase().includes(query) || d.specialization.toLowerCase().includes(query));
+    document.getElementById('doctorResults').innerHTML = results.map(d => 
+      `<div class="doctor-result">
+         <span>${d.name} - ${d.specialization}</span>
+         <button onclick="bookAppointment('${d.name}')">Book</button>
+       </div>`).join('');
+  });
+
+  function bookAppointment(doctorName){
+    const date = prompt(`Enter appointment date for ${doctorName} (YYYY-MM-DD):`);
+    if(date){
+      upcomingAppointments.push({ doctor: doctorName, date: date, status: "Pending" });
+      renderAppointments();
+      alert(`Appointment requested with ${doctorName} on ${date}`);
+    }
+  }
+
+  function renderAppointments(){
+    document.getElementById('upcomingAppointments').innerHTML = upcomingAppointments.map(a => 
+      `<div class="appointment">${a.date} with ${a.doctor} - ${a.status}</div>`).join('');
+
+    document.getElementById('pastAppointments').innerHTML = pastAppointments.map(a => 
+      `<div class="appointment">${a.date} with ${a.doctor} - Diagnosis: ${a.diagnosis}, Prescription: ${a.prescription}</div>`).join('');
+  }
+
+  renderAppointments();
+</script>
+
+</body>
+</html>

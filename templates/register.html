@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+
+    /* Global Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+    .navbar {
+    background-color: #4c5d94; /* Deep Blue Theme from your files */
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Poppins', sans-serif;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+/* Logo/Branding */
+.logo {
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: white;
+}
+
+/* Desktop Links Container */
+.nav-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+/* Link Styling */
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+    font-size: 0.95rem;
+    font-weight: 400;
+}
+
+.nav-links a:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Highlighted Dashboard Links */
+.dashboard-link {
+    background-color: white !important;
+    color: #4c5d94 !important;
+    font-weight: 600 !important;
+    padding: 8px 15px;
+}
+
+.dashboard-link:hover {
+    background-color: #f0f0f0 !important;
+}
+
+/* Mobile Menu Toggle (Hamburger Icon) */
+.menu-toggle {
+    display: none; /* Hidden on desktop */
+    font-size: 1.5rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Responsive Adjustments (Mobile View) */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none; /* Hide by default on mobile */
+        flex-direction: column;
+        width: 100%;
+        position: absolute;
+        top: 60px; /* Below the header */
+        left: 0;
+        background-color: #4c5d94;
+        padding: 10px 0;
+        z-index: 100;
+    }
+
+    .nav-links.active {
+        display: flex; /* Show when toggled */
+    }
+
+    .nav-links a {
+        text-align: center;
+        padding: 10px 20px;
+        width: 100%;
+        margin: 5px 0;
+    }
+    
+    .menu-toggle {
+        display: block; /* Show hamburger icon */
+    }
+}
+    body {
+      background: #4c5d94;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative background shapes */
+    body::before, body::after {
+      content: "";
+      position: absolute;
+      width: 500px;
+      height: 1000px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 50%;
+      z-index: 0;
+    }
+    body::before { top: -100px; left: -150px; }
+    body::after { bottom: -100px; right: -150px; }
+
+    /* Registration Container */
+    .register-container {
+      position: relative;
+      z-index: 1;
+      width: 500px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 40px 30px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+    .register-container h2 {
+      margin-bottom: 20px;
+      font-weight: 600;
+      font-size: 1.6rem;
+    }
+
+    .error-message {
+      color: #f69f9f;
+      background: rgba(255, 77, 77, 0.1);
+      border: 1px solid #f69f9f;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: none;
+    }
+
+    .input-box {
+      position: relative;
+      margin: 15px 0;
+    }
+    .input-box input {
+      width: 100%;
+      padding: 12px 40px 12px 15px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: transparent;
+      border-radius: 8px;
+      color: white;
+      font-size: 0.95rem;
+      outline: none;
+      transition: 0.3s;
+    }
+    .input-box input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    .input-box input:focus {
+      border-color: white;
+    }
+
+    .input-box i {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.7);
+      pointer-events: none;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 0.5px; 
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.9); 
+      cursor: pointer; 
+      font-size: 1.2rem;
+      z-index: 10;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .password-toggle i {
+      pointer-events: auto;
+      font-style: normal;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-group {
+      margin-top: 20px;
+    }
+    .btn-group button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95rem;
+      background: white;
+      color: #1e48d3;
+      transition: background 0.3s;
+    }
+    .btn-group button:hover {
+      background: #dbcae5;
+    }
+
+    .login-link {
+      display: block;
+      margin-top: 15px;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .login-link:hover {
+      text-decoration: underline;
+      color: white;
+    }
+
+    
+
+  </style>
+</head>
+<body>
+
+  <header class="navbar">
+    <a href="#" class="logo">Medi-Co</a>
+    
+    <nav id="navLinks" class="nav-links">
+        <a href="patient-login">Patient Login</a>
+        <a href="register">Register</a>
+        <a href="doctor-admin-login">Staff Login</a>
+
+    </nav>
+    
+    <div class="menu-toggle" onclick="toggleMenu()">
+        &#9776; <!-- Unicode for Hamburger Icon -->
+    </div>
+</header>
+  <div class="register-container">
+    <h2>Create Your Account</h2>
+
+    <div id="errorMessage" class="error-message"></div>
+
+    <form onsubmit="return handleRegister(event)">
+      <div class="input-box">
+        <input type="text" placeholder="Full Name" required>
+        <i>🧑</i>
+      </div>
+      <div class="input-box">
+        <input type="text" placeholder="Username" required>
+        <i>👤</i>
+      </div>
+      <div class="input-box">
+        <input type="email" placeholder="Email" required>
+        <i>📧</i>
+      </div>
+      <div class="input-box">
+        <input type="password" placeholder="Password" required id="passwordInput">
+        <span class="password-toggle" onclick="togglePasswordVisibility()">
+          <i class="show-icon">👁️</i> 
+          <i class="hide-icon" style="display: none;">🙈</i> 
+        </span>
+      </div>
+      <div class="input-box">
+        <input type="password" placeholder="Confirm Password" required id="confirmPasswordInput">
+        <i>🔒</i>
+      </div>
+
+      <div class="btn-group">
+        <button type="submit">REGISTER</button>
+      </div>
+
+      <a href="patient-login" class="login-link">Already have an account? Login here</a>
+    </form>
+  </div>
+   
+  <script>
+    function togglePasswordVisibility() {
+      const passwordInput = document.getElementById('passwordInput');
+      const showIcon = document.querySelector('.show-icon');
+      const hideIcon = document.querySelector('.hide-icon');
+
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        showIcon.style.display = 'none';
+        hideIcon.style.display = 'inline';
+      } else {
+        passwordInput.type = 'password';
+        showIcon.style.display = 'inline';
+        hideIcon.style.display = 'none';
+      }
+    }
+
+    function handleRegister(event) {
+      event.preventDefault();
+
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.style.display = 'none';
+      errorDiv.textContent = '';
+
+      const password = document.getElementById('passwordInput').value;
+      const confirmPassword = document.getElementById('confirmPasswordInput').value;
+
+      if (password !== confirmPassword) {
+        errorDiv.textContent = 'Passwords do not match!';
+        errorDiv.style.display = 'block';
+        return false;
+      }
+
+      // Simulated successful registration
+      alert('Registration successful! You can now login.');
+      // window.location.href = 'login.html'; // Uncomment to redirect to login page
+      return false;
+    }
+
+    function toggleMenu() {
+        const nav = document.getElementById('navLinks');
+        nav.classList.toggle('active');
+    }
+  </script>
+</body>
+</html>

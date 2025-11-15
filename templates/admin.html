@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: #4c5d94;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    h1, h2 {
+      font-weight: 600;
+    }
+
+    /* Dashboard cards */
+    .dashboard-cards {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+    .card {
+      flex: 1 1 200px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      transition: 0.3s;
+    }
+    .card:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .card h3 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    .card p {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.8);
+    }
+
+    /* Sections */
+    section {
+      margin-bottom: 30px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    table th, table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    table th {
+      background: rgba(255,255,255,0.15);
+    }
+    table tr:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    input, select, button {
+      padding: 8px 12px;
+      margin: 5px 0;
+      border-radius: 6px;
+      border: none;
+      outline: none;
+      font-size: 0.95rem;
+    }
+
+    input {
+      width: 200px;
+    }
+
+    button {
+      cursor: pointer;
+      background: #1e48d3;
+      color: white;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #3a5cbf;
+    }
+
+    .form-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Admin Dashboard</h1>
+
+  <!-- Dashboard cards -->
+  <div class="dashboard-cards">
+    <div class="card">
+      <h3 id="totalDoctors">12</h3>
+      <p>Total Doctors</p>
+    </div>
+    <div class="card">
+      <h3 id="totalPatients">45</h3>
+      <p>Total Patients</p>
+    </div>
+    <div class="card">
+      <h3 id="totalAppointments">32</h3>
+      <p>Total Appointments</p>
+    </div>
+  </div>
+
+  <!-- Add / Update Doctor -->
+  <section>
+    <h2>Add / Update Doctor</h2>
+    <form id="doctorForm">
+      <div class="form-group">
+        <input type="text" placeholder="Doctor Name" required>
+        <input type="text" placeholder="Specialization" required>
+        <input type="text" placeholder="Contact Number" required>
+        <button type="submit">Add/Update Doctor</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- View Appointments -->
+  <section>
+    <h2>Appointments</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Patient Name</th>
+          <th>Doctor</th>
+          <th>Date & Time</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="appointmentsTable">
+        <tr>
+          <td>John Doe</td>
+          <td>Dr. Smith</td>
+          <td>2025-11-15 10:00</td>
+          <td>Upcoming</td>
+        </tr>
+        <tr>
+          <td>Mary Jane</td>
+          <td>Dr. Adams</td>
+          <td>2025-11-12 15:00</td>
+          <td>Completed</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Search Patients / Doctors -->
+  <section>
+    <h2>Search</h2>
+    <div class="form-group">
+      <input type="text" id="searchPatient" placeholder="Search Patient by Name, ID, or Contact">
+      <button onclick="searchPatient()">Search Patient</button>
+    </div>
+    <div class="form-group">
+      <input type="text" id="searchDoctor" placeholder="Search Doctor by Name or Specialization">
+      <button onclick="searchDoctor()">Search Doctor</button>
+    </div>
+  </section>
+
+  <!-- Blacklist / Remove -->
+  <section>
+    <h2>Blacklist / Remove Users</h2>
+    <div class="form-group">
+      <input type="text" placeholder="Enter Doctor/Patient ID to remove">
+      <button>Blacklist / Remove</button>
+    </div>
+  </section>
+
+  <script>
+    // Dummy search functions
+    function searchPatient() {
+      const query = document.getElementById('searchPatient').value;
+      alert('Searching patients for: ' + query);
+    }
+
+    function searchDoctor() {
+      const query = document.getElementById('searchDoctor').value;
+      alert('Searching doctors for: ' + query);
+    }
+
+    // Dummy add/update doctor form
+    document.getElementById('doctorForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('Doctor added/updated!');
+    });
+  </script>
+</body>
+</html>
