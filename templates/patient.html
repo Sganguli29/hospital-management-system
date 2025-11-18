@@ -1,152 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Patient Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: "Poppins", sans-serif;
-      background: #f0f2f5;
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
     }
+
+    body {
+      background: #f0f2f5; /* Light background for patient view */
+      color: #333; /* Dark text for light background */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+    }
+
+    /* Header/Navbar Style */
     header {
-      background: #4c5d94;
+      background: #4c5d94; /* Deep Blue Theme */
       color: white;
       padding: 15px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-    header h2 { margin: 0; }
-    header button {
-      padding: 8px 12px;
+    header h1 { font-size: 1.5rem; margin: 0; }
+    .logout-btn {
+      padding: 8px 15px;
       border: none;
-      border-radius: 5px;
-      background: #d9534f;
+      border-radius: 6px;
+      background: #d9534f; /* Red/Danger color for logout */
       color: white;
       cursor: pointer;
       font-weight: 600;
+      transition: 0.3s;
     }
+    .logout-btn:hover { background: #c9302c; }
+
     main {
       padding: 20px;
-    }
-    input[type="text"] {
-      padding: 10px;
+      max-width: 1200px;
       width: 100%;
-      max-width: 400px;
+      margin: 20px auto;
+    }
+    
+    h2 {
+      font-weight: 600;
+      color: #4c5d94;
       margin-bottom: 15px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
     }
-    .doctor-result, .appointment {
-      background: white;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+
+    /* Dashboard cards adapted for patient data */
+    .dashboard-cards {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
     }
-    .doctor-result button, .appointment button {
-      padding: 5px 10px;
-      border: none;
-      border-radius: 5px;
+    .card {
+      flex: 1 1 200px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-left: 5px solid #4c5d94; /* Highlight */
+    }
+    .card h3 {
+      font-size: 2rem;
+      color: #4c5d94;
+      margin-bottom: 5px;
+    }
+    .card p {
+      font-size: 1rem;
+      color: #666;
+    }
+
+    /* Sections (Appointments, History) */
+    section {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+    
+    /* Doctor Search Styling */
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .search-box input {
+      flex-grow: 1;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    .search-box button {
       background: #4c5d94;
       color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
       cursor: pointer;
     }
-    h3 { margin-top: 30px; }
+
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+      align-items: center;
+    }
+    .list-item:last-child { border-bottom: none; }
+    .item-details span {
+      display: block;
+      font-size: 0.9rem;
+      color: #666;
+    }
+    .list-item button {
+      background: #28a745; /* Green for booking */
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
 <header>
-  <h2>Welcome, <span id="patientName"></span></h2>
-  <button onclick="logout()">Logout</button>
+  <h1>Welcome, <span id="patientName">Patient</span></h1>
+  <button class="logout-btn" onclick="logout()">Logout</button>
 </header>
 
 <main>
-  <h3>Search Doctors</h3>
-  <input type="text" id="searchDoctor" placeholder="Search by name or specialization">
-  <div id="doctorResults"></div>
+    <div class="dashboard-cards">
+    <div class="card">
+      <h3 id="upcomingApptsCount">2</h3>
+      <p>Upcoming Appointments</p>
+    </div>
+    <div class="card">
+      <h3 id="pastApptsCount">5</h3>
+      <p>Past Visits</p>
+    </div>
+    <div class="card">
+      <h3 id="favoriteDoctor">Dr. Smith</h3>
+      <p>Primary Care Doctor</p>
+    </div>
+  </div>
 
-  <h3>Upcoming Appointments</h3>
-  <div id="upcomingAppointments"></div>
+    <section>
+    <h2>📅 Upcoming Appointments</h2>
+    <div id="upcomingAppointments">
+            <div class="list-item">
+        <div class="item-details">
+          <strong>Dr. Smith (Cardiologist)</strong>
+          <span>Date: 2025-11-15 @ 10:00 AM | Status: Confirmed</span>
+        </div>
+        <button style="background: #f0ad4e;">Reschedule</button>
+      </div>
+    </div>
+  </section>
 
-  <h3>Past Appointments</h3>
-  <div id="pastAppointments"></div>
+    <section>
+    <h2>🩺 Book an Appointment</h2>
+    <div class="search-box">
+      <input type="text" id="searchDoctor" placeholder="Search by Doctor Name or Specialization">
+      <button onclick="performDoctorSearch()">Search</button>
+    </div>
+    <div id="doctorResults">
+            <div class="list-item">
+        <div>
+          <strong>Dr. Patel</strong>
+          <span>Pediatrician | Available next week</span>
+        </div>
+        <button onclick="bookAppointment('Dr. Patel')">Book Now</button>
+      </div>
+    </div>
+  </section>
+
+    <section>
+    <h2>📋 Past Medical History</h2>
+    <div id="pastAppointments">
+            <div class="list-item">
+        <div class="item-details">
+          <strong>Visit with Dr. Adams (Dermatologist)</strong>
+          <span>Date: 2025-10-01 | Diagnosis: Allergic reaction</span>
+        </div>
+        <button style="background: #5bc0de;">View Details</button>
+      </div>
+    </div>
+  </section>
 </main>
 
 <script>
-  // Check login
-  const role = sessionStorage.getItem('role');
+  
+  const role = '{{ session.get("role") }}';
   if(role !== 'patient'){
-    alert('Access denied! Please login as Patient.');
-    window.location.href = 'patient-login';
-  }
+   window.location.href = 'patient-login';
+ }
+  
+  
+  document.getElementById('patientName').textContent = 'Alice Johnson'; 
 
-  // Welcome message
-  const patientName = sessionStorage.getItem('username') || 'Patient';
-  document.getElementById('patientName').textContent = patientName;
-
-  // Logout function
+  
   function logout() {
-    sessionStorage.clear();
+    alert('Logged out!');
     window.location.href = 'patient-login';
   }
 
-  // Doctor search & booking
-  const doctors = [
-    { name: "Dr. Smith", specialization: "Cardiologist" },
-    { name: "Dr. Adams", specialization: "Dermatologist" },
-    { name: "Dr. Lee", specialization: "Neurologist" },
-    { name: "Dr. Patel", specialization: "Pediatrician" }
-  ];
 
-  const upcomingAppointments = [
-    { doctor: "Dr. Smith", date: "2025-11-15", status: "Confirmed" },
-    { doctor: "Dr. Lee", date: "2025-11-20", status: "Pending" }
-  ];
-
-  const pastAppointments = [
-    { doctor: "Dr. Adams", date: "2025-10-01", diagnosis: "Allergy", prescription: "Antihistamines" }
-  ];
-
-  // Render doctor results
-  const doctorInput = document.getElementById('searchDoctor');
-  doctorInput.addEventListener('input', function(){
-    const query = this.value.toLowerCase();
-    const results = doctors.filter(d => d.name.toLowerCase().includes(query) || d.specialization.toLowerCase().includes(query));
-    document.getElementById('doctorResults').innerHTML = results.map(d => 
-      `<div class="doctor-result">
-         <span>${d.name} - ${d.specialization}</span>
-         <button onclick="bookAppointment('${d.name}')">Book</button>
-       </div>`).join('');
-  });
-
-  function bookAppointment(doctorName){
-    const date = prompt(`Enter appointment date for ${doctorName} (YYYY-MM-DD):`);
-    if(date){
-      upcomingAppointments.push({ doctor: doctorName, date: date, status: "Pending" });
-      renderAppointments();
-      alert(`Appointment requested with ${doctorName} on ${date}`);
-    }
+  function performDoctorSearch() {
+   const query = document.getElementById('searchDoctor').value;
+    alert('Searching doctors for: ' + query);
   }
-
-  function renderAppointments(){
-    document.getElementById('upcomingAppointments').innerHTML = upcomingAppointments.map(a => 
-      `<div class="appointment">${a.date} with ${a.doctor} - ${a.status}</div>`).join('');
-
-    document.getElementById('pastAppointments').innerHTML = pastAppointments.map(a => 
-      `<div class="appointment">${a.date} with ${a.doctor} - Diagnosis: ${a.diagnosis}, Prescription: ${a.prescription}</div>`).join('');
+  
+  function bookAppointment(doctorName) {
+    alert('Initiating booking process for ' + doctorName);
   }
-
-  renderAppointments();
 </script>
 
 </body>

@@ -1,4 +1,4 @@
-from flask import render_template,request,redirect, url_for,flash
+from flask import render_template,request,redirect, url_for,flash, session
 from model import db, User
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -23,6 +23,8 @@ def init_routes(app):
             flash('Invalid username or password.')
             return redirect(url_for('patient_login'))
         
+        session['user_id'] = user.id     
+        session['role'] = 'patient'
         return redirect(url_for('patient_dashboard'))
     
 
