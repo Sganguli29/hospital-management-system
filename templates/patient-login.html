@@ -273,9 +273,17 @@
       0V9h.5a1,1,0,0,0,0-2Zm4,9.5h-1a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Z"/>
     </svg>
 
-    <form method="POST" action="/patient-login">>
+    <form method="POST" action="/patient-login">
       
-      <div id="errorMessage" class="error-message"></div>
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="error-message" style="display: block; color: #f0f0f0; background: #d9534f; border: none; font-size: 1rem; margin-bottom: 20px; padding: 10px;">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
       
       <div class="input-box">
         <input type="text" placeholder="Username" required name=username>

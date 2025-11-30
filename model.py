@@ -85,4 +85,5 @@ class Treatment(db.Model):
     # Optional FK: Record who created the treatment (The Doctor)
     created_by_doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
     doctor_creator = relationship('Doctor', backref='created_treatments', foreign_keys=[created_by_doctor_id])
+
     

@@ -26,6 +26,28 @@
       font-weight: 600;
     }
 
+    header {
+      background: #4c5d94; /* Deep Blue Theme */
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: -20px -20px 20px -20px; /* Adjust to cover the edge */
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .logout-btn {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 6px;
+      background: #d9534f; /* Red/Danger color for logout */
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+    .logout-btn:hover { background: #c9302c; }
+
     /* Dashboard cards */
     .dashboard-cards {
       display: flex;
@@ -54,16 +76,21 @@
       color: rgba(255,255,255,0.8);
     }
 
-    /* Sections */
+    /* Sections and Forms */
     section {
       margin-bottom: 30px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
     }
+    
     table {
       width: 100%;
       border-collapse: collapse;
       background: rgba(255,255,255,0.05);
       border-radius: 8px;
       overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     table th, table td {
       padding: 12px;
@@ -78,7 +105,7 @@
     }
 
     input, select, button {
-      padding: 8px 12px;
+      padding: 10px 12px;
       margin: 5px 0;
       border-radius: 6px;
       border: none;
@@ -86,8 +113,17 @@
       font-size: 0.95rem;
     }
 
-    input {
-      width: 200px;
+    input[type="text"], input[type="email"], input[type="password"], input[type="time"], select {
+      width: 100%;
+      max-width: 350px;
+      color: #333;
+    }
+    
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: rgba(255,255,255, 0.85);
     }
 
     button {
@@ -100,116 +136,516 @@
       background: #3a5cbf;
     }
 
-    .form-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      align-items: center;
-      margin-bottom: 15px;
+    .form-input-line {
+      margin-bottom: 15px; 
+    }   
+    
+    .form-input-line > div {
+        display: flex; 
+        gap: 10px; 
+        align-items: center;
+        max-width: 370px; /* To constrain button width */
+    }
+
+    /* Style for the reset button */
+    .btn-reset {
+        background: #5bc0de;
+        color: white;
+    }
+    .btn-reset:hover {
+        background: #46b8da;
+    }
+    /* Style for the table action buttons */
+    .btn-action {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+        background: #1e48d3;
+        margin-right: 5px;
+    }
+    .btn-action:hover {
+        opacity: 0.8;
+    }
+    /* Appointment Status Colors */
+    .status-Booked { color: #5bc0de; }
+    .status-Confirmed { color: #5cb85c; }
+    .status-Canceled { color: #d9534f; }
+    .status-Completed { color: #f0ad4e; }
+    
+    /* Blacklist Status */
+    .status-blacklisted { color: #d9534f; font-weight: 600; }
+    .status-active { color: #5cb85c; }
+    
+    /* Search Specific Styling */
+    #searchForm input[type="text"] {
+        max-width: 300px;
+    }
+    .search-results-section {
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 8px;
     }
   </style>
 </head>
 <body>
 
-  <h1>Admin Dashboard</h1>
+  <header>
+    <h1>Welcome, <span id="patientName">{{ admin_name }}</span></h1>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </header>
+  
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div style="margin-bottom: 20px; padding: 10px; border-radius: 6px;">
+        {% for category, message in messages %}
+            <div style="background-color: {% if category == 'error' %}#d9534f{% elif category == 'success' %}#5cb85c{% else %}#f0ad4e{% endif %}; color: white; padding: 10px; margin-bottom: 5px; border-radius: 4px;">
+                {{ message | escape }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
 
-  <!-- Dashboard cards -->
   <div class="dashboard-cards">
     <div class="card">
-      <h3 id="totalDoctors">12</h3>
+      <h3 id="totalDoctors">{{ total_doctors }}</h3>
       <p>Total Doctors</p>
     </div>
     <div class="card">
-      <h3 id="totalPatients">45</h3>
+      <h3 id="totalPatients">{{ total_patients }}</h3>
       <p>Total Patients</p>
     </div>
     <div class="card">
-      <h3 id="totalAppointments">32</h3>
+      <h3 id="totalAppointments">{{ total_appointments }}</h3>
       <p>Total Appointments</p>
     </div>
   </div>
-
-  <!-- Add / Update Doctor -->
+  
+  <!-- START SEARCH SECTION (Form Submission) -->
   <section>
-    <h2>Add / Update Doctor</h2>
-    <form id="doctorForm">
-      <div class="form-group">
-        <input type="text" placeholder="Doctor Name" required>
-        <input type="text" placeholder="Specialization" required>
-        <input type="text" placeholder="Contact Number" required>
-        <button type="submit">Add/Update Doctor</button>
+    <h2>Search Users</h2>
+    <form id="searchForm" method="POST" action="{{ url_for('search_users') }}">
+      <div class="form-input-line">
+          <label for="searchQuery">Search by Name, ID, Contact (Patient) or Specialization (Doctor):</label>
+          <input type="text" id="searchQuery" name="query" placeholder="Enter name, ID, contact, or specialization" required>
+      </div>
+      <div class="form-input-line">
+        <button type="submit" class="btn-action">Search</button>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn-reset btn-action" style="text-decoration: none; padding: 10px 12px; display: inline-block;">Clear Search</a>
+      </div>
+    </form>
+  </section>
+  <!-- END SEARCH SECTION -->
+  
+  <!-- START SEARCH RESULTS DISPLAY (New Section) -->
+  {% if search_results_doctors is not none or search_results_patients is not none %}
+  <section class="search-results-section">
+      <h2>Search Results</h2>
+      
+      {% if search_results_doctors %}
+      <h3>Filtered Doctors ({{ search_results_doctors|length }})</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>Profile ID</th>
+            <th>Full Name</th>
+            <th>Specialization</th>
+            <th>Contact</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user, doctor, department in search_results_doctors %}
+          <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ doctor.id }}</td>
+            <td>{{ user.full_name }}</td>
+            <td>{{ department.name }}</td>
+            <td>{{ doctor.contact_number }}</td>
+            <td><span class="status-{{ 'blacklisted' if doctor.is_blacklisted else 'active' }}">
+                {{ 'Blacklisted' if doctor.is_blacklisted else 'Active' }}
+            </span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <br>
+      {% endif %}
+      
+      {% if search_results_patients %}
+      <h3>Filtered Patients ({{ search_results_patients|length }})</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>Profile ID</th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Contact</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user, patient in search_results_patients %}
+          <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ patient.id }}</td>
+            <td>{{ user.full_name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ patient.contact_number or 'N/A' }}</td>
+            <td><span class="status-{{ 'blacklisted' if patient.is_blacklisted else 'active' }}">
+                {{ 'Blacklisted' if patient.is_blacklisted else 'Active' }}
+            </span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+      
+      {% if not search_results_doctors and not search_results_patients %}
+      <p>No results found matching your query.</p>
+      {% endif %}
+  </section>
+  {% endif %}
+  <!-- END SEARCH RESULTS DISPLAY -->
+  
+  <!-- START BLACKLIST/REMOVE SECTION -->
+  <section>
+    <h2>Blacklist / Remove Users</h2>
+    <form method="POST" action="{{ url_for('manage_blacklist') }}">
+      <div class="form-input-line">
+        <label for="target_id">User ID (from search results):</label>
+        <input type="text" id="target_id" name="target_id" placeholder="Enter User ID (e.g., 2)" required>
+      </div>
+      
+      <div class="form-input-line">
+        <label>Action:</label>
+        <div>
+            <button type="submit" name="action" value="blacklist" class="btn-action" style="background:#f0ad4e;"
+                    onclick="return confirm('WARNING: Are you sure you want to toggle the BLACKLIST status for this user?');">
+                Toggle Blacklist Status
+            </button>
+            <button type="submit" name="action" value="remove" class="btn-action" style="background:#d9534f;"
+                    onclick="return confirm('CRITICAL WARNING: Are you sure you want to PERMANENTLY REMOVE this user and all associated data? This cannot be undone.');">
+                Permanently Remove
+            </button>
+        </div>
+      </div>
+    </form>
+  </section>
+  <!-- END BLACKLIST/REMOVE SECTION -->
+  
+  <!-- START DOCTOR MANAGEMENT SECTION -->
+  <section>
+    <form id="doctorForm" method="POST" action="/manage-doctor">
+      <h2>Add New Doctor</h2>
+      <input type="hidden" name="doctor_id" id="doctor_id_input" value="">
+      
+      <div class="input-row-container">
+        <div class="form-input-line">
+            <label for="full_name_input">Full Name</label>
+            <input type="text" name="full_name" id="full_name_input" placeholder="Doctor Full Name" required>
+        </div>
+        <div class="form-input-line">
+            <label for="username_input">Username</label>
+            <input type="text" name="username" id="username_input" placeholder="Username" required>
+        </div>
+        <div class="form-input-line">
+            <label for="email_input">Email</label>
+            <input type="email" name="email" id="email_input" placeholder="Email" required>
+        </div>
+        <div class="form-input-line">
+            <label for="password_input">Password</label>
+            <input type="password" name="password" id="password_input" placeholder="Password" required>
+        </div>
+      </div>
+      
+      <div class="form-input-line">
+          <label for="specialization_input">Specialization</label>
+          <input type="text" name="specialization_name" id="specialization_input" placeholder="Specialization (e.g., Cardiology)" required>
+      </div>
+      <div class="form-input-line">
+          <label for="contact_input">Contact Number</label>
+          <input type="text" name="contact_number" id="contact_input" placeholder="Contact Number" required>
+      </div>
+      
+      <div class="form-input-line">
+        <div>
+            <button type="submit" id="submitBtn">Add Doctor</button>
+            <button type="button" class="btn-reset btn-action" onclick="resetDoctorForm()">Reset Form</button>
+        </div>
       </div>
     </form>
   </section>
 
-  <!-- View Appointments -->
+  <section>
+    <h2>Existing Doctors</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Full Name</th>
+          <th>Username</th>
+          <th>Specialization</th>
+          <th>Contact</th>
+          <th>Email</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user, doctor, department in doctors %}
+        <tr>
+          <td>{{ doctor.id }}</td>
+          <td>{{ user.full_name }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ department.name }}</td>
+          <td>{{ doctor.contact_number }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            <button class="btn-action" 
+              onclick="loadDoctorForUpdate('{{ doctor.id }}', '{{ user.full_name }}', '{{ user.username }}', '{{ user.email }}', '{{ department.name }}', '{{ doctor.contact_number }}')">
+              Update
+            </button>
+            <form action="{{ url_for('delete_doctor', doctor_id=doctor.id) }}"
+                method="POST"
+                style="display:inline;"
+                onsubmit="return confirm('Delete this doctor? This cannot be undone.');">
+              <button type="submit" class="btn-action" style="background:#d9534f;">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+        {% if not doctors %}
+        <tr><td colspan="7" style="text-align: center;">No doctors found.</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </section>
+  <!-- END DOCTOR MANAGEMENT SECTION -->
+  
+  <!-- START SCHEDULE MANAGEMENT SECTION -->
+  <section>
+    <form id="scheduleForm" method="POST" action="/manage-schedule">
+      <h2>Manage Doctor Availability</h2>
+      <!-- Hidden input to store the schedule ID for update/delete operations -->
+      <input type="hidden" name="schedule_id" id="schedule_id_input_form" value="">
+      
+      <div class="form-input-line">
+          <label for="schedule_doctor_id">Doctor:</label>
+          <select name="schedule_doctor_id" id="schedule_doctor_id" required>
+              <option value="">-- Select Doctor --</option>
+              {% for user, doctor, department in doctors %}
+              <option value="{{ doctor.id }}">{{ user.full_name }} ({{ department.name }})</option>
+              {% endfor %}
+          </select>
+      </div>
+
+      <div class="form-input-line">
+          <label for="day_of_week">Day of Week:</label>
+          <select name="day_of_week" id="day_of_week" required>
+              <option value="">-- Select Day --</option>
+              <option value="Monday">Monday</option>
+              <option value="Tuesday">Tuesday</option>
+              <option value="Wednesday">Wednesday</option>
+              <option value="Thursday">Thursday</option>
+              <option value="Friday">Friday</option>
+              <option value="Saturday">Saturday</option>
+              <option value="Sunday">Sunday</option>
+          </select>
+      </div>
+      
+      <div class="form-input-line">
+          <label for="start_time">Start Time (HH:MM):</label>
+          <input type="time" name="start_time" id="start_time" required>
+      </div>
+      
+      <div class="form-input-line">
+          <label for="end_time">End Time (HH:MM):</label>
+          <input type="time" name="end_time" id="end_time" required>
+      </div>
+      
+      <div class="form-input-line">
+        <div>
+            <button type="submit" id="scheduleSubmitBtn">Add Schedule</button>
+            <button type="button" class="btn-reset btn-action" onclick="resetScheduleForm()">Reset Schedule Form</button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <section>
+    <h2>Existing Doctor Schedules</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Doctor</th>
+          <th>Day</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for schedule, doctor, user in schedules %}
+        <tr>
+          <td>{{ user.full_name }}</td>
+          <td>{{ schedule.day_of_week }}</td>
+          <td>{{ schedule.start_time.strftime('%H:%M') }}</td>
+          <td>{{ schedule.end_time.strftime('%H:%M') }}</td>
+          <td>
+            <button class="btn-action" 
+              onclick="loadScheduleForUpdate('{{ schedule.id }}', '{{ doctor.id }}', '{{ schedule.day_of_week }}', '{{ schedule.start_time.strftime('%H:%M') }}', '{{ schedule.end_time.strftime('%H:%M') }}')">
+              Update
+            </button>
+            <form action="{{ url_for('delete_schedule', schedule_id=schedule.id) }}"
+                method="POST"
+                style="display:inline;"
+                onsubmit="return confirm('Delete this schedule?');">
+              <button type="submit" class="btn-action" style="background:#d9534f;">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+        {% if not schedules %}
+        <tr><td colspan="5" style="text-align: center;">No schedules found.</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </section>
+  <!-- END SCHEDULE MANAGEMENT SECTION -->
+
   <section>
     <h2>Appointments</h2>
     <table>
       <thead>
         <tr>
+          <th>ID</th>
           <th>Patient Name</th>
           <th>Doctor</th>
           <th>Date & Time</th>
           <th>Status</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody id="appointmentsTable">
+        {% for appt, patient_name, doctor_name in appointments %}
         <tr>
-          <td>John Doe</td>
-          <td>Dr. Smith</td>
-          <td>2025-11-15 10:00</td>
-          <td>Upcoming</td>
+          <td>{{ appt.id }}</td>
+          <td>{{ patient_name }}</td>
+          <td>{{ doctor_name }}</td>
+          <td>{{ appt.start_time.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td><span class="status-{{ appt.status }}">{{ appt.status }}</span></td>
+          <td>
+            <!-- Admin Actions -->
+            {% if appt.status != 'Confirmed' %}
+            <form action="{{ url_for('update_appointment_status', appointment_id=appt.id) }}" method="POST" style="display:inline;">
+              <input type="hidden" name="new_status" value="Confirmed">
+              <button type="submit" class="btn-action" style="background:#5cb85c;">Confirm</button>
+            </form>
+            {% endif %}
+            
+            {% if appt.status != 'Canceled' and appt.status != 'Completed' %}
+            <form action="{{ url_for('update_appointment_status', appointment_id=appt.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+              <input type="hidden" name="new_status" value="Canceled">
+              <button type="submit" class="btn-action" style="background:#d9534f;">Cancel</button>
+            </form>
+            {% endif %}
+          </td>
         </tr>
-        <tr>
-          <td>Mary Jane</td>
-          <td>Dr. Adams</td>
-          <td>2025-11-12 15:00</td>
-          <td>Completed</td>
-        </tr>
+        {% endfor %}
+        {% if not appointments %}
+        <tr><td colspan="6" style="text-align: center;">No appointments found.</td></tr>
+        {% endif %}
       </tbody>
     </table>
   </section>
 
-  <!-- Search Patients / Doctors -->
-  <section>
-    <h2>Search</h2>
-    <div class="form-group">
-      <input type="text" id="searchPatient" placeholder="Search Patient by Name, ID, or Contact">
-      <button onclick="searchPatient()">Search Patient</button>
-    </div>
-    <div class="form-group">
-      <input type="text" id="searchDoctor" placeholder="Search Doctor by Name or Specialization">
-      <button onclick="searchDoctor()">Search Doctor</button>
-    </div>
-  </section>
-
-  <!-- Blacklist / Remove -->
-  <section>
-    <h2>Blacklist / Remove Users</h2>
-    <div class="form-group">
-      <input type="text" placeholder="Enter Doctor/Patient ID to remove">
-      <button>Blacklist / Remove</button>
-    </div>
-  </section>
-
   <script>
-    // Dummy search functions
-    function searchPatient() {
-      const query = document.getElementById('searchPatient').value;
-      alert('Searching patients for: ' + query);
+
+    function logout() {
+      window.location.href = 'logout'; 
+    }
+    
+    // Function to reset the form back to Add New Doctor mode
+    function resetDoctorForm() {
+      // 1. Reset the form title and button text
+      document.querySelector('#doctorForm h2').textContent = 'Add New Doctor';
+      document.getElementById('submitBtn').textContent = 'Add Doctor';
+      document.getElementById('submitBtn').style.background = '#1e48d3';
+      
+      // 2. Clear all form fields
+      document.getElementById('doctorForm').reset();
+
+      // 3. Clear the hidden ID input (crucial for adding new doctor)
+      document.getElementById('doctor_id_input').value = "";
+      
+      // 4. Re-add the 'required' attribute for the password field
+      const passwordInput = document.getElementById('password_input');
+      passwordInput.setAttribute('required', 'required');
+      passwordInput.placeholder = 'Password';
     }
 
-    function searchDoctor() {
-      const query = document.getElementById('searchDoctor').value;
-      alert('Searching doctors for: ' + query);
+    // Function to load doctor data into the form for updating
+    function loadDoctorForUpdate(id, fullName, username, email, specialization, contact) {
+        console.log('loadDoctorForUpdate args:', id, fullName, username, email, specialization, contact);
+
+        // Change form title and button text
+        document.querySelector('#doctorForm h2').textContent = `Update Doctor ${fullName}`;
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.textContent = 'Save Changes';
+        submitBtn.style.background = '#008cba'; // Optional: highlight update button
+
+        // Fill form fields – names must match your form
+        document.getElementById('doctor_id_input').value = id;
+        document.getElementById('full_name_input').value = fullName;
+        document.getElementById('username_input').value = username;
+        document.getElementById('email_input').value = email;
+        document.getElementById('specialization_input').value = specialization;
+        document.getElementById('contact_input').value = contact;
+
+        // Make password optional on update
+        const passwordInput = document.getElementById('password_input');
+        passwordInput.value = '';
+        passwordInput.removeAttribute('required');
+        passwordInput.placeholder = 'Leave blank to keep current password';
+    }
+    
+    // --- SCHEDULE MANAGEMENT JS ---
+
+    // Function to reset the schedule form
+    function resetScheduleForm() {
+      document.querySelector('#scheduleForm h2').textContent = 'Manage Doctor Availability';
+      document.getElementById('scheduleSubmitBtn').textContent = 'Add Schedule';
+      document.getElementById('scheduleSubmitBtn').style.background = '#1e48d3';
+      document.getElementById('scheduleForm').reset();
+      // Crucial: Clear the hidden ID input
+      document.getElementById('schedule_id_input_form').value = ""; 
     }
 
-    // Dummy add/update doctor form
-    document.getElementById('doctorForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      alert('Doctor added/updated!');
-    });
+    // Function to load schedule data into the form for updating
+    function loadScheduleForUpdate(id, doctorId, dayOfWeek, startTime, endTime) {
+        console.log('loadScheduleForUpdate args:', id, doctorId, dayOfWeek, startTime, endTime);
+
+        // Change form title and button text
+        document.querySelector('#scheduleForm h2').textContent = 'Update Doctor Schedule';
+        const submitBtn = document.getElementById('scheduleSubmitBtn');
+        submitBtn.textContent = 'Save Schedule Changes';
+        submitBtn.style.background = '#008cba'; // Highlight update button
+
+        // Fill form fields
+        // Target the unique ID for the schedule ID
+        document.getElementById('schedule_id_input_form').value = id; 
+        
+        // Select the Doctor dropdown value
+        document.getElementById('schedule_doctor_id').value = doctorId;
+        
+        // Set other values
+        document.getElementById('day_of_week').value = dayOfWeek;
+        document.getElementById('start_time').value = startTime;
+        document.getElementById('end_time').value = endTime;
+    }
+
   </script>
 </body>
 </html>

@@ -257,7 +257,6 @@
     
     <nav id="navLinks" class="nav-links">
         <a href="patient-login">Patient Login</a>
-        <a href="register">Register</a>
         <a href="doctor-admin-login">Staff Login</a>
 
     </nav>
@@ -268,10 +267,19 @@
 </header>
   <div class="register-container">
     <h2>Create Your Account</h2>
-
     <div id="errorMessage" class="error-message"></div>
+    
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="error-message" style="display: block; color: #f0f0f0; background: #d9534f; border: none; font-size: 1rem;">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
 
-    <form onsubmit="return handleRegister(event)"  method="post" action="/register">
+    <form method="post" action="/register">
       <div class="input-box">
         <input type="text" name="fullname" placeholder="Full Name" required>
         <i>🧑</i>
@@ -305,6 +313,7 @@
   </div>
    
   <script>
+    // --- Utility Functions ---
     function togglePasswordVisibility() {
       const passwordInput = document.getElementById('passwordInput');
       const showIcon = document.querySelector('.show-icon');
@@ -320,29 +329,31 @@
         hideIcon.style.display = 'none';
       }
     }
-
-    function handleRegister(event) {
-      event.preventDefault();
-
-      const errorDiv = document.getElementById('errorMessage');
-      errorDiv.style.display = 'none';
-      errorDiv.textContent = '';
-
-      const password = document.getElementById('passwordInput').value;
-      const confirmPassword = document.getElementById('confirmPasswordInput').value;
-
-      if (password !== confirmPassword) {
-        errorDiv.textContent = 'Passwords do not match!';
-        errorDiv.style.display = 'block';
-        return false;
-      }
-      event.target.submit();      
-    }
-
+    
     function toggleMenu() {
         const nav = document.getElementById('navLinks');
         nav.classList.toggle('active');
     }
-  </script>
+
+    // --- Client-Side Validation ---
+    document.querySelector('form').addEventListener('submit', function(event) {
+        
+        const errorDiv = document.getElementById('errorMessage');
+        const password = document.getElementById('passwordInput').value;
+        const confirmPassword = document.getElementById('confirmPasswordInput').value;
+
+        // Clear previous client-side errors
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+        
+        // Check for password mismatch
+        if (password !== confirmPassword) {
+            event.preventDefault(); // STOP submission to the server
+            errorDiv.textContent = 'Passwords do not match!';
+            errorDiv.style.display = 'block';
+            return; // Exit the function
+        }
+    });
+</script>
 </body>
 </html>
